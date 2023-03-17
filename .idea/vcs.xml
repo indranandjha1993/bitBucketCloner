@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/digitalstadium.playserver" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/digitalstadium.wigwamv2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/digitalstadiumserver" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/docker-spring-boot-test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/fli-birmingham-android-app" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/fli-birmingham-ios-app" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/fli-club-apps-android" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/game-of-fans-web" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/hivecore-r-analytics-server" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/hivecore-sample-android-app" vcs="Git" />
+  </component>
+</project>
