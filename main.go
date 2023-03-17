@@ -129,24 +129,45 @@ func cloneRepositories(perPage int, page int, workspace string, username string,
 		fmt.Printf("Error getting repositories: %s\n", err.Error())
 		return
 	}
-	for _, repo := range repositories {
-		cloneRepository(workspace, repo, username, password)
-	}
-}
 
-func cloneRepository(workspace string, repository string, username string, password string) {
-	url := fmt.Sprintf("https://%s:%s@bitbucket.org/%s/%s.git", username, password, workspace, repository)
-	cmd := exec.Command("git", "clone", url)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			fmt.Printf("Error cloning repository %s: %s\n", repository, exitErr.Stderr)
-		} else {
-			fmt.Printf("Error cloning repository %s: %v\n", repository, err)
+	type cloneResult struct {
+		repo string
+		err  error
+	}
+
+	results := make(chan cloneResult)
+
+	for _, repo := range repositories {
+		go func(workspace, repository, username, password string) {
+			url := fmt.Sprintf("https://%s:%s@bitbucket.org/%s/%s.git", username, password, workspace, repository)
+			cmd := exec.Command("git", "clone", url)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err := cmd.Run()
+			if err != nil {
+				if exitErr, ok := err.(*exec.ExitError); ok {
+					results <- cloneResult{repo: repository, err: fmt.Errorf("error cloning repository %s: %s", repository, exitErr.Stderr)}
+				} else {
+					results <- cloneResult{repo: repository, err: fmt.Errorf("error cloning repository %s: %v", repository, err)}
+				}
+			} else {
+				results <- cloneResult{repo: repository, err: nil}
+			}
+		}(workspace, repo, username, password)
+	}
+
+	// wait for all Goroutines to finish and collect results
+	var errorRepositories []string
+	for i := 0; i < len(repositories); i++ {
+		result := <-results
+		if result.err != nil {
+			errorRepositories = append(errorRepositories, result.repo)
+			continue
 		}
-	} else {
-		fmt.Printf("Repository %s cloned successfully.\n", repository)
+		fmt.Printf("Repository %s cloned successfully.\n", result.repo)
+	}
+
+	if len(errorRepositories) > 0 {
+		fmt.Printf("Error cloning repositories: %v\n", errorRepositories)
 	}
 }
